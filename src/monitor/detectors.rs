@@ -3,8 +3,6 @@
 //! Currently not used - kept for potential future enhancement.
 //! The monitor uses a simple process-alive check instead.
 
-#![allow(dead_code)]
-
 use crate::models::Task;
 use std::fs;
 use std::process::Command;
@@ -90,7 +88,8 @@ impl AttentionDetector for ProcessStateDetector {
                 let task_age = SystemTime::now()
                     .duration_since(UNIX_EPOCH)
                     .unwrap()
-                    .as_secs() as i64 - task.created_at.timestamp();
+                    .as_secs() as i64
+                    - task.created_at.timestamp();
 
                 if task_age > 10 && context.idle_duration.as_secs() > 5 {
                     return Some(AttentionReason::WaitingForInput);
@@ -99,7 +98,6 @@ impl AttentionDetector for ProcessStateDetector {
         }
         None
     }
-
 }
 
 /// Detector that checks if process has been inactive for too long
@@ -140,7 +138,8 @@ impl AttentionDetector for StallDetector {
                     let task_age = SystemTime::now()
                         .duration_since(UNIX_EPOCH)
                         .unwrap()
-                        .as_secs() as i64 - task.created_at.timestamp();
+                        .as_secs() as i64
+                        - task.created_at.timestamp();
 
                     if task_age > 30 {
                         return Some(AttentionReason::ProcessStalled);
@@ -151,7 +150,6 @@ impl AttentionDetector for StallDetector {
 
         None
     }
-
 }
 
 /// Detector that uses lsof to check if process is reading from stdin
@@ -200,15 +198,14 @@ impl AttentionDetector for StdinDetector {
         }
         None
     }
-
 }
 
 pub fn create_default_detectors() -> Vec<Box<dyn AttentionDetector>> {
     vec![
         Box::new(ProcessStateDetector::new()),
         Box::new(StallDetector::new(Duration::from_secs(600))), // 10 minutes
-        // StdinDetector is more invasive (requires lsof), so we exclude it by default
-        // Box::new(StdinDetector::new()),
+                                                                // StdinDetector is more invasive (requires lsof), so we exclude it by default
+                                                                // Box::new(StdinDetector::new()),
     ]
 }
 
@@ -226,10 +223,7 @@ mod tests {
             AttentionReason::ProcessStalled.as_str(),
             "Process stalled (no activity)"
         );
-        assert_eq!(
-            AttentionReason::Custom("Test".to_string()).as_str(),
-            "Test"
-        );
+        assert_eq!(AttentionReason::Custom("Test".to_string()).as_str(), "Test");
     }
 
     #[test]
